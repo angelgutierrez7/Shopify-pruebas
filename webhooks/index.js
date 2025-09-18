@@ -8,17 +8,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ type: "application/json" }));
+app.use(express.json({
+  type: 'application/json',
+  verify: (req, _res, buf) => { req.rawBody = buf; }
+}));
 
 function verifyShopifyHmac(req) {
-  const hmacHeader = req.get("X-Shopify-Hmac-Sha256");
-  const body = JSON.stringify(req.body);
-  const hash = crypto
-    .createHmac("sha256", process.env.SHOPIFY_SECRET)
-    .update(body, "utf8")
-    .digest("base64");
-  return hash === hmacHeader;
+  if (process.env.SKIP_HMAC === "true") return true;
+  const h = req.get("X-Shopify-Hmac-Sha256") || "";
+  const digest = crypto.createHmac("sha256", process.env.SHOPIFY_SECRET)
+    .update(req.rawBody).digest("base64");
+  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(h));
 }
+
 
 app.post("/webhooks/orders", async (req, res) => {
   if (!verifyShopifyHmac(req)) {
