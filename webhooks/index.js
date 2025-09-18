@@ -1,8 +1,8 @@
 import express from "express";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import Pedido from "./models/Pedido.js";
-import sequelize from "./database.js";
+import Pedido from "../models/Pedido.js";
+import sequelize from "../database.js";
 
 dotenv.config();
 const app = express();
