@@ -1,7 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import Pedido from "./models/Pedido.js";
+import Pedido from "../models/Pedido.js";
 import sequelize from "../models/database.js";
 
 dotenv.config();
