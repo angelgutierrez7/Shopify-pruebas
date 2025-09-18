@@ -14,13 +14,25 @@ app.use(express.json({
 }));
 
 function verifyShopifyHmac(req) {
-  if (process.env.SKIP_HMAC === "true") return true;
-  const h = req.get("X-Shopify-Hmac-Sha256") || "";
-  const digest = crypto.createHmac("sha256", process.env.SHOPIFY_SECRET)
-    .update(req.rawBody).digest("base64");
-  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(h));
-}
+  const provided = req.get('X-Shopify-Hmac-Sha256') || '';
+  const calc = crypto.createHmac('sha256', process.env.SHOPIFY_SECRET)
+    .update(req.rawBody)            // <— SIEMPRE el body crudo
+    .digest('base64');
 
+  console.log('--- Webhook IN ---');
+  console.log('topic:', req.get('X-Shopify-Topic'));
+  console.log('shop :', req.get('X-Shopify-Shop-Domain'));
+  console.log('wid  :', req.get('X-Shopify-Webhook-Id'));
+  console.log('HMAC provided:', provided);
+  console.log('HMAC calc    :', calc);
+  console.log('Body length  :', req.rawBody?.length, 'bytes');
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(calc), Buffer.from(provided));
+  } catch {
+    return false;
+  }
+}
 
 app.post("/webhooks/orders", async (req, res) => {
   if (!verifyShopifyHmac(req)) {
