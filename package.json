@@ -12,6 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/angelgutierrez7/Shopify-pruebas/issues"
   },
