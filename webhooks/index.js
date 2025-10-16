@@ -19,7 +19,6 @@ function verifyShopifyHmac(req) {
     .update(req.rawBody)            // <— SIEMPRE el body crudo
     .digest('base64');
 
-  console.log('--- Webhook IN ---');
   console.log('topic:', req.get('X-Shopify-Topic'));
   console.log('shop :', req.get('X-Shopify-Shop-Domain'));
   console.log('wid  :', req.get('X-Shopify-Webhook-Id'));
@@ -58,6 +57,10 @@ app.post("/webhooks/orders", async (req, res) => {
     res.status(500).send("Error");
   }
 });
+
+app.get("producto"), async (req, res) => {
+    res.status(200).send(50);
+}
 
 (async () => {
   try {
