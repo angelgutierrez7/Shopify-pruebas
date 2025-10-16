@@ -59,7 +59,7 @@ app.post("/webhooks/orders", async (req, res) => {
 });
 
 app.get("/producto", async (req, res) => {
-  res.status(200).send("50");
+  res.status(200).send("15");
 });
 
 (async () => {
