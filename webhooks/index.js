@@ -9,25 +9,39 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors())
+app.use(cors());
 
-app.use(express.json({
-  type: 'application/json',
-  verify: (req, _res, buf) => { req.rawBody = buf; }
-}));
+app.use(
+  express.json({
+    type: "application/json",
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
+
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "ALLOWALL");
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors https://admin.shopify.com https://electricavaldez.myshopify.com;"
+  );
+  next();
+});
 
 function verifyShopifyHmac(req) {
-  const provided = req.get('X-Shopify-Hmac-Sha256') || '';
-  const calc = crypto.createHmac('sha256', process.env.SHOPIFY_SECRET)
-    .update(req.rawBody)            // <— SIEMPRE el body crudo
-    .digest('base64');
+  const provided = req.get("X-Shopify-Hmac-Sha256") || "";
+  const calc = crypto
+    .createHmac("sha256", process.env.SHOPIFY_SECRET)
+    .update(req.rawBody) // <— SIEMPRE el body crudo
+    .digest("base64");
 
-  console.log('topic:', req.get('X-Shopify-Topic'));
-  console.log('shop :', req.get('X-Shopify-Shop-Domain'));
-  console.log('wid  :', req.get('X-Shopify-Webhook-Id'));
-  console.log('HMAC provided:', provided);
-  console.log('HMAC calc    :', calc);
-  console.log('Body length  :', req.rawBody?.length, 'bytes');
+  console.log("topic:", req.get("X-Shopify-Topic"));
+  console.log("shop :", req.get("X-Shopify-Shop-Domain"));
+  console.log("wid  :", req.get("X-Shopify-Webhook-Id"));
+  console.log("HMAC provided:", provided);
+  console.log("HMAC calc    :", calc);
+  console.log("Body length  :", req.rawBody?.length, "bytes");
 
   try {
     return crypto.timingSafeEqual(Buffer.from(calc), Buffer.from(provided));
@@ -68,14 +82,12 @@ app.get("/producto", async (req, res) => {
 (async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync()
+    await sequelize.sync();
     console.log("Base de datos conectada");
 
-    
-  app.listen(PORT, () => {
-  console.log(`Servidor corriendo`);
-});
-
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo`);
+    });
   } catch (err) {
     console.error("Error al conectar DB:", err);
   }
